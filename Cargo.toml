@@ -1,0 +1,27 @@
+[package]
+name = "appstore"
+version = "0.1.0"
+authors = ["Rijul Gulati <rijul@rijulgulati.com>"]
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+near-sdk = "4.0.0-pre.4"
+
+[dependencies.uuid]
+version = "1"
+features = [
+    "v4",
+    "fast-rng",
+    "js"
+]
+
+[profile.release]
+codegen-units = 1
+opt-level = "z"
+lto = true
+debug = false
+panic = "abort"
+overflow-checks = true
