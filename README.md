@@ -92,7 +92,7 @@ $ ./get-balance.sh $NEAR_APPSTORE
 - If supplied deposit is greater than app price, remaining amount is refunded back to buyer (`buyer-$NEAR_APPSTORE`)
 
 ```sh
-$ near call $MASTER_ACCOUNT buy_app '{"id": 1}' --deposit 2 --accountId buyer-$MASTER_ACCOUNT
+$ near call $NEAR_APPSTORE buy_app '{"id": 1}' --deposit 2 --accountId buyer-$NEAR_APPSTORE
 ```
 
 ### Recheck accounts balance
