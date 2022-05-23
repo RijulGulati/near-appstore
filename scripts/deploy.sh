@@ -7,4 +7,4 @@ cargo build --manifest-path ../Cargo.toml --target wasm32-unknown-unknown --rele
 echo "\n DEPLOYING CONTRACT TO TESTNET \n"
 
 # Deploy on testnet
-near dev-deploy --wasmFile ../target/wasm32-unknown-unknown/release/appstore.wasm --initFunction new --initArgs '{"developer_account": "developer1.rijul.testnet"}'
+near dev-deploy --wasmFile ../target/wasm32-unknown-unknown/release/appstore.wasm --initFunction new --initArgs '{}'

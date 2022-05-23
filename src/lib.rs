@@ -28,70 +28,10 @@ pub struct AppStore {
 #[near_bindgen]
 impl AppStore {
     #[init]
-    pub fn new(developer_account: AccountId) -> Self {
+    pub fn new() -> Self {
         Self {
-            apps: AppStore::init_apps(developer_account),
+            apps: TreeMap::new(b"t"),
         }
-    }
-
-    fn init_apps(developer_account: AccountId) -> TreeMap<u64, App> {
-        let mut apps: TreeMap<u64, App> = TreeMap::new(b"t");
-        apps.insert(
-            &1,
-            &App {
-                id: 1,
-                title: "Pokemon".to_string(),
-                genre: "games".to_string(),
-                price: 1_000_000_000_000_000_000_000_000,
-                published_on: env::block_timestamp_ms(),
-                developer: developer_account.clone(),
-            },
-        );
-        apps.insert(
-            &2,
-            &App {
-                id: 2,
-                title: "GTA V".to_string(),
-                genre: "games".to_string(),
-                price: 2_000_000_000_000_000_000_000_000,
-                published_on: env::block_timestamp_ms(),
-                developer: developer_account.clone(),
-            },
-        );
-        apps.insert(
-            &3,
-            &App {
-                id: 3,
-                title: "Uncharted".to_string(),
-                genre: "games".to_string(),
-                price: 3_000_000_000_000_000_000_000_000,
-                published_on: env::block_timestamp_ms(),
-                developer: developer_account.clone(),
-            },
-        );
-        apps.insert(
-            &4,
-            &App {
-                id: 4,
-                title: "Telegram".to_string(),
-                genre: "entertainment".to_string(),
-                price: 4_000_000_000_000_000_000_000_000,
-                published_on: env::block_timestamp_ms(),
-                developer: developer_account.clone(),
-            },
-        );
-        apps.insert(
-            &5,
-            &App {
-                id: 5,
-                title: "Discord".to_string(),
-                genre: "entertainment".to_string(),
-                price: 5_000_000_000_000_000_000_000_000,
-                published_on: env::block_timestamp_ms(),
-                developer: developer_account,
-            },
-        );
-        apps
     }
 
     pub fn publish_app(&mut self, title: String, genre: String, yocto_price: U128) -> bool {
@@ -209,14 +149,14 @@ mod tests {
         let context = get_context();
         testing_env!(context.build());
 
-        let mut store = AppStore::new(env::signer_account_id());
-        assert_eq!(store.list_apps().len(), 5);
+        let mut store = AppStore::new();
+        assert_eq!(store.list_apps().len(), 0);
         let result = store.publish_app(
             "Red Dead Redemption".to_string(),
             "games".to_string(),
             U128(8 * near_sdk::ONE_NEAR),
         );
         assert!(result);
-        assert_eq!(6, store.list_apps().len());
+        assert_eq!(1, store.list_apps().len());
     }
 }
