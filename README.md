@@ -37,7 +37,7 @@ https://explorer.testnet.near.org/transactions/13THp9TjmmsH9Spi6FydcHqdZqNiTGxc4
 Done deploying and initializing dev-1653307261772-38523729167455
 ```
 
-Note the developer account name (Name will be different for you)
+Note the developer account name (Name will be different for you). Let's assign this account name to a variable for easy access.
 
 ```sh
 $ NEAR_APPSTORE=dev-1653307261772-38523729167455
@@ -47,12 +47,13 @@ $ NEAR_APPSTORE=dev-1653307261772-38523729167455
 
 After deployment, we need to setup two accounts:
 
-- Buyer account: Account from which buyer pays for application. The account is of format: `developer-$NEAR_APPSTORE`.
-- Developer account: Account developer uses to publish application and receive royalties. The account is of format: `buyer-$NEAR_APPSTORE`.
+- Buyer account: Account from which buyer pays for application. The account is of format: `buyer-$NEAR_APPSTORE`.
+- Developer account: Account developer uses to publish application and receive royalties. The account is of format: `developer-$NEAR_APPSTORE`.
 
 The provided helper script will setup these accounts for us.
 
 ```sh
+$ cd scripts
 $ ./setup-accounts.sh $NEAR_APPSTORE
 ```
 
@@ -73,7 +74,7 @@ $ near view $NEAR_APPSTORE list_apps
 Assuming the App Developer publishes new app to store using account `developer-$NEAR_APPSTORE` account (account `developer-$NEAR_APPSTORE` was created with `setup-accounts.sh` script)
 
 ```sh
-$ near call $NEAR_APPSTORE publish_app '{"title":"Youtube", "genre":"entertainment", "yocto_price":"9000000000000000000000000"}' --accountId developer-$NEAR_APPSTORE
+$ near call $NEAR_APPSTORE publish_app '{"title":"Youtube", "genre":"entertainment", "yocto_price":"2000000000000000000000000"}' --accountId developer-$NEAR_APPSTORE
 ```
 
 ## Check balances of accounts
@@ -85,15 +86,13 @@ $ ./get-balance.sh $NEAR_APPSTORE
 
 ## Buy app
 
-Assuming a buyer buys app from store:
-
-- The buyer signs the transaction and will have to deposit app price equivalent of NEAR.
-- 50% of app price is paid to developer.
-- Remaining 50% is paid to app store.
-- If supplied deposit is greater than app price, remaining amount is refunded back to buyer
+- The buyer signs the transaction and will have to attach deposit equivalent to app price.
+  - 50% of app price is paid to developer (`developer-$NEAR_APPSTORE`)
+  - Remaining 50% is paid to app store (`$NEAR_APPSTORE`)
+- If supplied deposit is greater than app price, remaining amount is refunded back to buyer (`buyer-$NEAR_APPSTORE`)
 
 ```sh
-$ near call $MASTER_ACCOUNT buy_app '{"id": 2}' --deposit 2 --accountId buyer-$MASTER_ACCOUNT
+$ near call $MASTER_ACCOUNT buy_app '{"id": 1}' --deposit 2 --accountId buyer-$MASTER_ACCOUNT
 ```
 
 ### Recheck accounts balance
