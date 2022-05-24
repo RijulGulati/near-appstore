@@ -84,44 +84,44 @@ Sample respnose -
 ```json
 [
   {
-    id: 1,
-    title: 'Pokemon',
-    genre: 'games',
-    price: 2.5e+24,
-    published_on: 1653383267193,
-    developer: 'developer-dev-1653383057039-59136275303926'
+    "id": 1,
+    "title": "Pokemon",
+    "genre": "games",
+    "price": 2.5e24,
+    "published_on": 1653383267193,
+    "developer": "developer-dev-1653383057039-59136275303926"
   },
   {
-    id: 2,
-    title: 'PUBG',
-    genre: 'games',
-    price: 2e+24,
-    published_on: 1653383272261,
-    developer: 'developer-dev-1653383057039-59136275303926'
+    "id": 2,
+    "title": "PUBG",
+    "genre": "games",
+    "price": 2e24,
+    "published_on": 1653383272261,
+    "developer": "developer-dev-1653383057039-59136275303926"
   },
   {
-    id: 3,
-    title: 'WhatsApp',
-    genre: 'entertainment',
-    price: 3e+23,
-    published_on: 1653383278450,
-    developer: 'developer-dev-1653383057039-59136275303926'
+    "id": 3,
+    "title": "WhatsApp",
+    "genre": "entertainment",
+    "price": 3e23,
+    "published_on": 1653383278450,
+    "developer": "developer-dev-1653383057039-59136275303926"
   },
   {
-    id: 4,
-    title: 'Discord',
-    genre: 'entertainment',
-    price: 4e+23,
-    published_on: 1653383286354,
-    developer: 'developer-dev-1653383057039-59136275303926'
+    "id": 4,
+    "title": "Discord",
+    "genre": "entertainment",
+    "price": 4e23,
+    "published_on": 1653383286354,
+    "developer": "developer-dev-1653383057039-59136275303926"
   },
   {
-    id: 5,
-    title: 'Telegram',
-    genre: 'entertainment',
-    price: 5e+23,
-    published_on: 1653383291710,
-    developer: 'developer-dev-1653383057039-59136275303926'
+    "id": 5,
+    "title": "Telegram",
+    "genre": "entertainment",
+    "price": 5e23,
+    "published_on": 1653383291710,
+    "developer": "developer-dev-1653383057039-59136275303926"
   }
 ]
 ```
@@ -186,4 +186,5 @@ near view $NEAR_APPSTORE list_buyer_apps '{"buyer": "buyer-'"$NEAR_APPSTORE"'"}'
 ```
 
 # License
+
 [MIT](https://github.com/RijulGulati/near-appstore/blob/main/LICENSE)
