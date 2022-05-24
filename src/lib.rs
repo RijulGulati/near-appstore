@@ -17,7 +17,6 @@ pub struct App {
     price: u128,
     published_on: u64,
     developer: AccountId,
-    buyers: Vec<AccountId>,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, PanicOnDefault)]
@@ -72,28 +71,21 @@ impl AppStore {
                     id,
                     published_on: env::block_timestamp_ms(),
                     developer: env::signer_account_id(),
-                    buyers: vec![],
                 },
             )
             .is_none()
     }
 
     pub fn list_apps(&self) -> Vec<App> {
-        let res: Vec<App> = self
-            .apps
-            .iter()
-            .map(|(_, mut app)| {
-                app.buyers = self.get_app_buyers(&app.id);
-                app
-            })
-            .collect();
+        let res: Vec<App> = self.apps.iter().map(|(_, app)| app).collect();
         res
     }
 
-    // // When buying app:
-    // // 1. Transaction is signed by buyer
-    // // 2. Store gets 50% of app price
-    // // 3. Remaining 50% goes to app owner
+    /* When buying app:
+        1. Transaction is signed by buyer
+        2. Store gets 50% of app price
+        3. Remaining 50% goes to app developer
+    */
     #[payable]
     pub fn buy_app(&mut self, id: u64) -> Promise {
         if env::current_account_id() == env::signer_account_id() {
@@ -178,21 +170,26 @@ impl AppStore {
 
 #[cfg(test)]
 mod tests {
-    use near_sdk::{test_utils::VMContextBuilder, testing_env, AccountId};
+    use near_sdk::{test_utils::VMContextBuilder, testing_env};
 
     use super::*;
 
-    fn get_context() -> VMContextBuilder {
+    fn get_developer_context() -> VMContextBuilder {
         let mut builder = VMContextBuilder::new();
-        let developer_account = AccountId::new_unchecked("developer.near".to_string());
-        builder.signer_account_id(developer_account.clone());
-        builder.predecessor_account_id(developer_account);
+        builder.account_balance(5 * near_sdk::ONE_NEAR);
+        builder
+    }
+
+    fn get_buyer_context() -> VMContextBuilder {
+        let mut builder = VMContextBuilder::new();
+        builder.signer_account_id("buyer.near".parse().unwrap());
+        builder.attached_deposit(2 * near_sdk::ONE_NEAR);
         builder
     }
 
     #[test]
     fn publish_app() {
-        let context = get_context();
+        let context = get_developer_context();
         testing_env!(context.build());
 
         let mut store = AppStore::new();
@@ -204,5 +201,28 @@ mod tests {
         );
         assert!(result);
         assert_eq!(1, store.list_apps().len());
+    }
+
+    #[test]
+    fn buy_app() {
+        let context = get_buyer_context();
+        testing_env!(context.build());
+
+        let mut store = AppStore::new();
+        store.publish_app(
+            "Red Dead Redemption".to_string(),
+            "games".to_string(),
+            U128(3 * near_sdk::ONE_NEAR),
+        );
+
+        store.publish_app(
+            "GTA V".to_string(),
+            "games".to_string(),
+            U128(2 * near_sdk::ONE_NEAR),
+        );
+
+        store.buy_app(2);
+        let account_id = store.buyers.get(&2).unwrap();
+        assert_eq!(account_id[0].as_str(), "buyer.near".to_string());
     }
 }
