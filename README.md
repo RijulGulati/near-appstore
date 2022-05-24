@@ -176,13 +176,13 @@ $ near call $NEAR_APPSTORE buy_app '{"id": 2}' --deposit 2 --accountId buyer-$NE
 - Store account is credited with 1N.
 - Buyer account is debited with 2N.
 
-(Actual deductions might slightly different. This does not take Gas fee into account).
+(Actual deductions might be slightly different. This does not take Gas fee into account).
 
 ```
 $ ./get-balance.sh $NEAR_APPSTORE
 ```
 
-Further, buyer account is visible in app's `developer` property.
+Further, buyer account is visible in app's `buyers` property. This can be verified with below command -
 
 ```sh
 $ near view $NEAR_APPSTORE list_apps
@@ -191,5 +191,5 @@ $ near view $NEAR_APPSTORE list_apps
 ## List apps bought by buyer
 
 ```sh
-$ near view $NEAR_SC list_buyer_apps '{"buyer": "buyer-'"$NEAR_SC"'"}'
+$ near view $NEAR_APPSTORE list_buyer_apps '{"buyer": "buyer-'"$NEAR_APPSTORE"'"}'
 ```
