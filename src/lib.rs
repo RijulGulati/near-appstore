@@ -17,12 +17,14 @@ pub struct App {
     price: u128,
     published_on: u64,
     developer: AccountId,
+    buyers: Vec<AccountId>,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, PanicOnDefault)]
 #[near_bindgen]
 pub struct AppStore {
     apps: TreeMap<u64, App>,
+    buyers: TreeMap<u64, Vec<AccountId>>,
 }
 
 #[near_bindgen]
@@ -31,6 +33,7 @@ impl AppStore {
     pub fn new() -> Self {
         Self {
             apps: TreeMap::new(b"t"),
+            buyers: TreeMap::new(b"b"),
         }
     }
 
@@ -69,13 +72,21 @@ impl AppStore {
                     id,
                     published_on: env::block_timestamp_ms(),
                     developer: env::signer_account_id(),
+                    buyers: vec![],
                 },
             )
             .is_none()
     }
 
     pub fn list_apps(&self) -> Vec<App> {
-        let res: Vec<App> = self.apps.iter().map(|(_, app)| app).collect();
+        let res: Vec<App> = self
+            .apps
+            .iter()
+            .map(|(_, mut app)| {
+                app.buyers = self.get_app_buyers(&app.id);
+                app
+            })
+            .collect();
         res
     }
 
@@ -98,6 +109,11 @@ impl AppStore {
         }
 
         let app = self.apps.get(&id).unwrap();
+
+        if self.is_app_bought(&app.id, &env::signer_account_id()) {
+            env::panic_str("Specified buyer has already bought this app before")
+        }
+
         let deposit = env::attached_deposit();
         if deposit < app.price {
             env::panic_str(
@@ -126,7 +142,37 @@ impl AppStore {
             p1 = p1.then(p2);
         }
 
+        if let Some(mut buyer) = self.buyers.get(&app.id) {
+            self.buyers.remove(&app.id);
+            buyer.push(env::signer_account_id());
+            self.buyers.insert(&app.id, &buyer);
+        } else {
+            self.buyers.insert(&app.id, &vec![env::signer_account_id()]);
+        }
         p1
+    }
+
+    fn get_app_buyers(&self, id: &u64) -> Vec<AccountId> {
+        match self.buyers.get(id) {
+            Some(buyers) => buyers,
+            None => vec![],
+        }
+    }
+
+    fn is_app_bought(&self, app_id: &u64, buyer: &AccountId) -> bool {
+        let buyers = self.get_app_buyers(app_id);
+        buyers.contains(buyer)
+    }
+
+    pub fn list_buyer_apps(&self, buyer: AccountId) -> Vec<String> {
+        let mut result: Vec<String> = vec![];
+        self.buyers.into_iter().for_each(|(id, buyers)| {
+            if buyers.contains(&buyer) {
+                result.push(self.apps.get(&id).unwrap().title)
+            }
+        });
+
+        result
     }
 }
 
