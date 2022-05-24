@@ -4,22 +4,23 @@ This project is built for NCD (NEAR Certified Developer) demonstration.
 
 # About
 
-NEAR App store is an app store simulation smart contract. The flow is as follows:
+NEAR App store is an app store simulation smart contract. Following actions can be performed:
 
 - Developers can publish application to store. They need to specify app `title`, `genre` and `yocto_price` (yoctoNEAR). (function: `publish_app`)
-- Buyers can buy apps from app store. They need to attach deposit to contract call. (function: `buy_app`)
-- Apps can be listed with the help of exposed view function (function: `list_apps`)
+- Buyers can buy apps from app store. They need to attach deposit to contract call. (function: `buy_app`).
+- List all available apps in appstore (function: `list_apps`)
+- List apps bought by a particular buyer (function: `list_buyer_apps`)
 
 **Store economics**
 
 - For every app bought by the buyer, 50% of app price is paid to the developer, and remaining 50% of price is paid to the store.
   - Example: If an app costs 2 NEAR, 1 NEAR is sent to developer, and remaining 1 NEAR is sent to app store.
-- If buyer's deposit is less than app price, contract panics with error message.
-- **If buyer's deposit is greater than app price, the additional amount is refunded back to the buyer.**
+- If buyer's deposit is less than app price, contract panics with appropriate error message.
+- If buyer's deposit is greater than app price, the additional amount is refunded back to the buyer.
 
 # Initial Setup
 
-## Build and Deploy contract
+## 1. Build and Deploy contract
 
 This requires Rust and NEAR CLI installed in system.
 
@@ -43,7 +44,7 @@ Note the developer account name (Name will be different for you). Let's assign t
 $ NEAR_APPSTORE=dev-1653307261772-38523729167455
 ```
 
-## Setup accounts
+## 2. Setup accounts
 
 After deployment, we need to setup two accounts:
 
@@ -57,6 +58,15 @@ $ cd scripts
 $ ./setup-accounts.sh $NEAR_APPSTORE
 ```
 
+## 3. Publish sample apps to store (optional)
+
+```sh
+$ cd scripts
+$ ./publish-sample-apps.sh $NEAR_APPSTORE
+```
+
+This script publishes 5 sample apps to appstore. All these apps have developer set to `developer-$NEAR_APPSTORE`. Alternatively, NEAR CLI can be used directly to publish app (as mentioned below).
+
 **This completes initial setup!**
 
 ---
@@ -69,12 +79,64 @@ $ ./setup-accounts.sh $NEAR_APPSTORE
 $ near view $NEAR_APPSTORE list_apps
 ```
 
+Sample respnose -
+
+```json
+[
+  {
+    "id": 1,
+    "title": "Pokemon",
+    "genre": "games",
+    "price": 2.5e24,
+    "published_on": 1653372690226,
+    "developer": "developer-dev-1653372617003-54598823973395",
+    "buyers": []
+  },
+  {
+    "id": 2,
+    "title": "PUBG",
+    "genre": "games",
+    "price": 2e24,
+    "published_on": 1653372695297,
+    "developer": "developer-dev-1653372617003-54598823973395",
+    "buyers": []
+  },
+  {
+    "id": 3,
+    "title": "WhatsApp",
+    "genre": "entertainment",
+    "price": 3e23,
+    "published_on": 1653372700308,
+    "developer": "developer-dev-1653372617003-54598823973395",
+    "buyers": []
+  },
+  {
+    "id": 4,
+    "title": "Discord",
+    "genre": "entertainment",
+    "price": 4e23,
+    "published_on": 1653372705554,
+    "developer": "developer-dev-1653372617003-54598823973395",
+    "buyers": []
+  },
+  {
+    "id": 5,
+    "title": "Telegram",
+    "genre": "entertainment",
+    "price": 5e23,
+    "published_on": 1653372711523,
+    "developer": "developer-dev-1653372617003-54598823973395",
+    "buyers": []
+  }
+]
+```
+
 ## Publish new app to store
 
 Assuming the App Developer publishes new app to store using account `developer-$NEAR_APPSTORE` account (account `developer-$NEAR_APPSTORE` was created with `setup-accounts.sh` script)
 
 ```sh
-$ near call $NEAR_APPSTORE publish_app '{"title":"Youtube", "genre":"entertainment", "yocto_price":"2000000000000000000000000"}' --accountId developer-$NEAR_APPSTORE
+$ near call $NEAR_APPSTORE publish_app '{"title":"Youtube", "genre":"entertainment", "yocto_price":"6000000000000000000000000"}' --accountId developer-$NEAR_APPSTORE
 ```
 
 ## Check balances of accounts
@@ -84,19 +146,50 @@ $ cd scripts
 $ ./get-balance.sh $NEAR_APPSTORE
 ```
 
+Sample response -
+
+```
+Fetching balance
+
+dev-1653372617003-54598823973395: 170.9967835824049317 NEAR (appstore)
+developer-dev-1653372617003-54598823973395: 10.9964139969337521 NEAR (developer)
+buyer-dev-1653372617003-54598823973395: 17.9992326788740635 NEAR (buyer)
+```
+
+Balance is in NEAR.
+
 ## Buy app
 
 - The buyer signs the transaction and will have to attach deposit equivalent to app price.
   - 50% of app price is paid to developer (`developer-$NEAR_APPSTORE`)
   - Remaining 50% is paid to app store (`$NEAR_APPSTORE`)
 - If supplied deposit is greater than app price, remaining amount is refunded back to buyer (`buyer-$NEAR_APPSTORE`)
+- If supplied deposit is less than app price, contract panics with appropriate error message.
 
 ```sh
-$ near call $NEAR_APPSTORE buy_app '{"id": 1}' --deposit 2 --accountId buyer-$NEAR_APPSTORE
+$ near call $NEAR_APPSTORE buy_app '{"id": 2}' --deposit 2 --accountId buyer-$NEAR_APPSTORE
 ```
 
-### Recheck accounts balance
+**On success, re-check account balances. We should see the following result:**
+
+- Developer account is credited with 1N.
+- Store account is credited with 1N.
+- Buyer account is debited with 2N.
+
+(Actual deductions might slightly different. This does not take Gas fee into account).
 
 ```
 $ ./get-balance.sh $NEAR_APPSTORE
+```
+
+Further, buyer account is visible in app's `developer` property.
+
+```sh
+$ near view $NEAR_APPSTORE list_apps
+```
+
+## List apps bought by buyer
+
+```sh
+$ near view $NEAR_SC list_buyer_apps '{"buyer": "buyer-'"$NEAR_SC"'"}'
 ```
